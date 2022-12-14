@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from "axios";
 
 const apiClient: AxiosInstance = axios.create({
-  baseURL: "http://a0754686.xsph.ru/laravel/public/api/",
+  baseURL: import.meta.env.VITE_LARAVEL_API_ADDRESS,
   headers: {
     "Content-type": "application/json",
   },

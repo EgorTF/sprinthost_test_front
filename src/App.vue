@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import "./scss/style.scss";
-
+const laravel_storage = import.meta.env.VITE_LARAVEL_ADDRESS;
 </script>
 <template>
   <div class="dashboard">
@@ -30,7 +30,7 @@ import "./scss/style.scss";
         >
           <img
             class="icon"
-            :src="'http://localhost:8000' + type.image"
+            :src="laravel_storage + type.image"
             :alt="type.type"
           />
         </div>
@@ -43,7 +43,7 @@ import "./scss/style.scss";
           :key="animal.id"
           style="width: 30px"
           class="animal"
-          :src="'http://localhost:8000/images/' + animal.type.image"
+          :src="laravel_storage + '/images/' + animal.type.image"
           :id="animal.type.type"
           @click="getDescription(animal)"
           :alt="animal.type.type"
@@ -207,12 +207,12 @@ export default defineComponent({
   async mounted() {
     this.retrieveAnimals();
     this.retrieveTypes();
-
+    console.log(import.meta.env.VITE_LARAVEL_ADDRESS);
     this.Echo = new Echo({
       broadcaster: "pusher",
-      key: "3V_bSw.DpgXxw",
+      key: import.meta.env.VITE_ABLY_KEY,
       cluster: "eu",
-      wsHost: "realtime-pusher.ably.io",
+      wsHost: import.meta.env.VITE_ABLY_HOST,
       wsPort: 80,
       disableStats: true,
       encrypted: true,
