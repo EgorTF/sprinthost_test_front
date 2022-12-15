@@ -84,18 +84,23 @@ body {
 }
 
 .description {
-  position: absolute;
-  bottom: 15%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: white;
-  border: 2px solid aquamarine;
-  display: flex;
-  border-radius: 64px;
+  position: relative;
+  align-self: center;
+  opacity: 0;
+  transition: 0.2s ease;
+  padding-bottom: 50px;
+  &.active {
+    opacity: 100%;
+  }
 }
 
 .description-text {
   align-self: center;
+  background-color: white;
+  border: 2px solid aquamarine;
+  display: flex;
+  border-radius: 64px;
+  margin: 10px;
   padding: 20px 50px 20px 50px;
 }
 
@@ -109,17 +114,19 @@ body {
   flex-wrap: nowrap;
   align-items: center;
   grid-gap: 20px;
+  flex-direction: row;
   gap: 50px;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  align-self: center;
+  position: relative;
 }
 
 .content {
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
+  display: flex;
   position: relative;
+  justify-content: center;
+  flex-direction: column;
 }
 
 .animal {
@@ -147,31 +154,33 @@ body {
 }
 
 .dashboard {
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  min-height: 100%;
   background: linear-gradient(180deg, #E0F7FA 0%, #80DEEA 100%);
-  position: relative;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  position: absolute;
+  gap: 10px;
 }
 
-.container {
-  width: 48px;
+.menu {
+  width: 100%;
   height: 48px;
-  position: absolute;
-  top: 50px;
-  left: 50px;
-  transform: translate(-50%, -50%);
+  position: relative;
+  flex-direction: row;
+  padding-left: 50px;
+  margin-top: 50px;
   z-index: 100;
 }
 
 .menu-button {
-  width: 100%;
+  width: 48px;
   height: 100%;
   background: #3E2723;
   border-radius: 50%;
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+
   transition: all 0.6s cubic-bezier(0.680, -0.550, 0.265, 1.550);
   z-index: 1;
   cursor: pointer;
@@ -201,7 +210,7 @@ body {
 .menu-group {
   background: #D7CCC8;
   border-radius: 0 8px 8px 0;
-  position: absolute;
+  position: relative;
   display: flex;
   align-items: center;
   width: 0;
@@ -225,7 +234,7 @@ body {
   position: relative;
 }
 
-.container.active {
+.menu.active {
   .menu-group {
     width: 236px;
     gap: 6px;
@@ -233,27 +242,32 @@ body {
   }
 
   .menu-button {
-    transform: translate(-50%, -50%) rotate(90deg);
+    transform: rotate(90deg);
   }
 }
 
 .popup {
   width: 100%;
-  height: 2000px;
-  background-color: rgba(0, 0, 0, 0);
+  height: 100%;
+
+  padding: 0 10px 0 10px;
   overflow: hidden;
   position: fixed;
   top: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 
   .popup-content {
     display: flex;
     flex-direction: column;
-    margin: 200px auto 0 auto;
-    width: 50%;
+    align-self: center;
+    max-width: 100%;
+    min-width: 50%;
     padding: 10px;
     background-color: white;
     border-radius: 25px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 0 10px rgb(0 0 0 / 25%);
 
     h2 {
       padding: 15px;
@@ -271,5 +285,11 @@ body {
       border-radius: 50px;
       border-color: #80DEEA;
     }
+  }
+}
+
+@media (max-width: 600px) {
+  .animals {
+    flex-direction: column;
   }
 }

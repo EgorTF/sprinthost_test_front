@@ -1,82 +1,24 @@
 <script setup lang="ts">
 import "./scss/style.scss";
-const laravel_storage = import.meta.env.VITE_LARAVEL_ADDRESS;
+import FormComponent from "@/components/Form/FormComponent.vue";
+import DescriptionComponent from "@/components/Description/DescriptionComponent.vue";
+import AnimalsList from "@/components/Animals/AnimalsList.vue";
 </script>
 <template>
   <div class="dashboard">
-    <div :class="['container', isActive ? 'active' : '']" id="container">
-      <div class="menu-button" @click="switchActive">
-        <svg
-          class="dashboard__icon"
-          width="14"
-          height="14"
-          viewBox="0 0 14 14"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          -->
-          <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="white" />
-        </svg>
-      </div>
-      <div class="menu-group">
-        <div
-          v-for="type in types"
-          :key="type.id"
-          class="menu-item"
-          :class="isExist(type) ? 'disabled' : ''"
-          @click="
-            isExist(type) ? updateAnimal(type.id) : openCreateAnimalPopup(type)
-          "
-        >
-          <img
-            class="icon"
-            :src="laravel_storage + type.image"
-            :alt="type.type"
-          />
-        </div>
-      </div>
-    </div>
-    <div class="content">
-      <div class="animals">
-        <img
-          v-for="animal in animals"
-          :key="animal.id"
-          style="width: 30px"
-          class="animal"
-          :src="laravel_storage + '/images/' + animal.type.image"
-          :id="animal.type.type"
-          @click="getDescription(animal)"
-          :alt="animal.type.type"
-        />
-      </div>
-      <div class="description" v-if="info">
-        <span class="description-text">
-          {{ info?.type.type }} {{ info?.name }},
-          {{ Math.floor(info?.age) + formatAgeString(info?.age) }},
-          размер {{ info?.size }}
-        </span>
-      </div>
-    </div>
+    <MenuComponent
+      :animals="animals"
+      :types="types"
+      @createAnimal="openCreateAnimalPopup"
+    ></MenuComponent>
+    <AnimalsList :animals="animals" @getDescription="getDescription" />
+    <DescriptionComponent :info="info" />
   </div>
-  <form
-    class="popup"
-    id="form"
+  <FormComponent
     v-if="creatingAnimal"
-    v-on:submit="submitForm"
-  >
-    <div class="popup-content">
-      <h2>Введите имя для своего животного "{{ creatingAnimal.type }}"</h2>
-      <input
-        placeholder="Ввведите имя животного"
-        id="name"
-        v-model="form.name"
-        type="text"
-        class="field"
-        required
-      />
-      <button type="submit">Завести животного</button>
-    </div>
-  </form>
+    :creatingAnimal="creatingAnimal"
+    @created="animalCreated"
+  />
 </template>
 
 <script lang="ts">
@@ -88,8 +30,10 @@ import type AnimalsResponse from "@/types/AnimalsResponse";
 import type TypesResponse from "@/types/TypesResponse";
 import Echo from "laravel-echo";
 import Pusher from "pusher-js";
+import MenuComponent from "@/components/Menu/MenuComponent.vue";
 export default defineComponent({
   name: "test-app",
+  components: { MenuComponent },
   data() {
     return {
       Echo: null as Echo | null,
@@ -99,16 +43,10 @@ export default defineComponent({
       isActive: false,
       currentAnimal: undefined as number | undefined,
       info: null as Animal | null,
-      form: {
-        name: "",
-      },
       creatingAnimal: null as Type | null,
     };
   },
   methods: {
-    isExist: function (type: { id: number }) {
-      return this.animals.find((animal: Animal) => animal.type.id === type.id);
-    },
     retrieveAnimals: function () {
       AnimalsDataService.getAll()
         .then((response: AnimalsResponse) => {
@@ -122,11 +60,11 @@ export default defineComponent({
     openCreateAnimalPopup: function (type: Type) {
       this.creatingAnimal = type;
     },
-    createAnimal: async function (creatingAnimal: Type | null) {
-      await AnimalsDataService.create({
-        animal_type_id: creatingAnimal?.id,
-        name: this.form.name,
-      });
+    animalCreated: function () {
+      this.creatingAnimal = null;
+      this.refreshData();
+    },
+    refreshData: function () {
       this.retrieveAnimals();
       this.retrieveTypes();
       this.calculateSize(this.animals);
@@ -143,34 +81,6 @@ export default defineComponent({
     getDescription: async function (animal: Animal) {
       this.currentAnimal = animal.id;
       this.info = animal;
-    },
-    formatAgeString: function (age: number) {
-      age = Math.floor(age);
-      if (age == 1) {
-        return " год";
-      } else if (age <= 4 && age > 1) {
-        return " года";
-      } else {
-        return " лет";
-      }
-    },
-    updateAnimal: function (typeId: number) {
-      const animal = this.animals.find((animal) => animal.type.id === typeId);
-      AnimalsDataService.patch(animal?.id);
-    },
-    submitForm: function (payload: Event) {
-      payload.preventDefault();
-      this.createAnimal(this.creatingAnimal);
-      this.creatingAnimal = null;
-      this.form.name = "";
-    },
-    switchActive: function () {
-      const { isActive: isActive } = this;
-      if (isActive) {
-        this.isActive = !this.isActive;
-      } else {
-        this.isActive = !this.isActive;
-      }
     },
     updateInfo: function (currentAnimal?: number) {
       this.info = this.animals.find(
@@ -205,9 +115,7 @@ export default defineComponent({
     },
   },
   async mounted() {
-    this.retrieveAnimals();
-    this.retrieveTypes();
-    console.log(import.meta.env.VITE_LARAVEL_ADDRESS);
+    this.refreshData();
     this.Echo = new Echo({
       broadcaster: "pusher",
       key: import.meta.env.VITE_ABLY_KEY,
